@@ -1,0 +1,174 @@
+/*
+ * apps/onlyoffice/custom-overrides.css
+ *
+ * Custom UI suppression for the ONLYOFFICE Document Server. Targets
+ * elements that the Community license refuses to hide via the public
+ * editorConfig.customization API. Loaded by the presentation editor
+ * via a <link> tag injected into its index.html (see ../Dockerfile).
+ *
+ * INTENT
+ *   Render PPTX decks as a near-pure slide viewer:
+ *     - Keep: ONLYOFFICE logo, slide thumbnail rail, slide content,
+ *             bottom status bar (zoom, slide counter)
+ *     - Hide: file/view tabs, search, user avatar, left-rail panels
+ *             other than the slide thumbnails
+ *
+ * MIGRATION TO DEVELOPER / WHITE-LABEL LICENSE
+ *   When the Developer-tier license is acquired, prefer the public
+ *   ``editorConfig.customization`` API over CSS overrides. For each
+ *   block below the comment names the equivalent config flag (or
+ *   notes that none exists). Delete the block, add the flag in
+ *   ``apps/homescreen/app/office/onlyoffice.py``.
+ *
+ * SELECTOR DRIFT
+ *   Selectors drift between Document Server releases. Re-verify after every
+ *   base-image bump (see ../Dockerfile): open the viewer, switch DevTools to
+ *   the OnlyOffice iframe, inspect each targeted element, update blocks here.
+ */
+
+/* ---------- TOP HEADER (right side) ---------- */
+
+/*
+ * User avatar / "A" badge for anonymous users (top-right).
+ *
+ * The visible markup OnlyOffice 9.0.4 emits looks like:
+ *   <div class="btn-slot" data-layout-name="header-user">
+ *     <button class="btn btn-header slot-btn-user-name hidden">...</button>
+ *     <div class="btn-current-user">
+ *       <div class="color-user-name">A</div>
+ *     </div>
+ *   </div>
+ *
+ * Targeting the ``[data-layout-name="header-user"]`` slot is the cleanest
+ * because OnlyOffice uses ``data-layout-name`` as a stable identifier for
+ * chrome slots; the auto-generated ids and helper classes drift between
+ * builds. The other selectors are belt-and-braces in case the slot
+ * attribute is ever renamed.
+ *
+ * Developer-license equivalent:
+ *   customization.layout.header.user:  false
+ *   customization.layout.header.users: false
+ */
+[data-layout-name="header-user"],
+.btn-current-user,
+.slot-btn-user-name,
+.color-user-name {
+    display: none !important;
+}
+
+/*
+ * Top-right magnifying-glass / "find" button (also reachable via
+ * Cmd+F in the slide area).
+ *
+ * Developer-license equivalent: none. Keep this CSS.
+ */
+#slot-btn-search {
+    display: none !important;
+}
+
+/*
+ * Document-name input in the toolbar (the disabled <input> next to
+ * the tab strip showing the file name). ``customization.toolbarHideFileName``
+ * + ``style-skip-docname`` body class are the documented levers, but
+ * 9.0.4 still renders it as an empty bordered input. Hide it directly.
+ *
+ * Developer-license equivalent: customization.toolbarHideFileName: true
+ * (already set; this CSS exists only because the flag is honoured
+ * incompletely in 9.x Community).
+ */
+#box-doc-name,
+#rib-doc-name {
+    display: none !important;
+}
+
+/* ---------- TOP TOOLBAR TABS (Datei / Ansicht / Plugins / Collaboration) ---------- */
+
+/*
+ * "Datei" / File menu tab. ``data-layout-name="toolbar-file"`` is
+ * OnlyOffice's stable hook for this <li>; targeting it removes the
+ * whole tab including its click area, which the previous
+ * ``[data-tab='file']`` selector left behind.
+ *
+ * Developer-license equivalent: none. Keep this CSS.
+ */
+[data-layout-name="toolbar-file"] {
+    display: none !important;
+}
+
+/*
+ * "Ansicht" / View tab. Holds zoom and slide-vs-notes toggle. The
+ * bottom status bar already provides zoom + slide counter, so the
+ * tab is redundant for view-only users.
+ *
+ * Developer-license equivalent: none. Keep this CSS.
+ */
+[data-layout-name="toolbar-view"] {
+    display: none !important;
+}
+
+/*
+ * "Plugins" and "Zusammenarbeit" / Collaboration tabs. Already
+ * ``display: none`` server-side in our config, but belt-and-braces
+ * in case future config changes flip them on.
+ */
+[data-layout-name="toolbar-plugins"],
+[data-layout-name="toolbar-collaboration"] {
+    display: none !important;
+}
+
+/* ---------- LEFT RAIL (panel switchers) ---------- */
+
+/*
+ * Comments / Chat panel switcher. ``customization.comments: false``
+ * only hides the toolbar Comments button in Community; the rail
+ * icon survives.
+ *
+ * Developer-license equivalent: customization.comments: false
+ * (still keep CSS in 9.x; the API does not cover the rail icon even
+ * on Developer, per OnlyOffice forum reports as of 9.0).
+ */
+#left-btn-comments,
+#left-btn-chat {
+    display: none !important;
+}
+
+/*
+ * Search panel switcher. Redundant with the toolbar search (also
+ * hidden above) and with browser Cmd+F.
+ *
+ * Developer-license equivalent: none. Keep this CSS.
+ */
+#left-btn-search {
+    display: none !important;
+}
+
+/*
+ * About / Info / Document Info panel switcher.
+ * Developer-license equivalent: none. Keep this CSS.
+ */
+#left-btn-about,
+#left-btn-info {
+    display: none !important;
+}
+
+/*
+ * Plugins panel switcher. We disable plugins via
+ * ``customization.plugins: false`` already, but the rail icon can
+ * survive in some versions.
+ *
+ * Developer-license equivalent: customization.plugins: false (already
+ * set). Keep CSS as a belt-and-braces.
+ */
+#left-btn-plugins {
+    display: none !important;
+}
+
+/*
+ * Feedback & Support panel switcher.
+ * Developer-license equivalent: customization.feedback: false (already
+ * set). Keep CSS as a belt-and-braces.
+ */
+#left-btn-support,
+#left-btn-feedback {
+    display: none !important;
+}
